@@ -23,7 +23,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-produc
 # DEBUG = config('DEBUG', default=True, cast=bool)
 # ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,MaganH.pythonanywhere.com', cast=Csv())
 DEBUG=False
-ALLOWED_HOSTS=['*']
+ALLOWED_HOSTS=["*"]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -75,9 +75,32 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'elearning.wsgi.application'
+DB_LIVE=os.getenv("DB_LIVE")
+if DB_LIVE in ["False",False]:
+    DATABASES = {
+        'default':{
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+    'default':{
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
+        
+    }
+}
+    
 
-# # Database
-# # PostgreSQL for production, SQLite for development
+
+
+# # # Database
+# # # PostgreSQL for production, SQLite for development
 # DATABASES = {
 #     'default': dj_database_url.config(
 #         default=config('DATABASE_URL', default=f'sqlite:///{BASE_DIR}/db.sqlite3'),
@@ -86,7 +109,7 @@ WSGI_APPLICATION = 'elearning.wsgi.application'
 #     )
 # }
 
-# # For PostgreSQL specifically
+# # # For PostgreSQL specifically
 # if 'postgresql' in DATABASES['default']['ENGINE'] or 'postgres' in DATABASES['default']['ENGINE']:
 #     DATABASES['default']['OPTIONS'] = {
 #         'connect_timeout': 10,
@@ -96,16 +119,16 @@ WSGI_APPLICATION = 'elearning.wsgi.application'
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=config(
-            'DATABASE_URL',
-            default=f'sqlite:///{BASE_DIR}/db.sqlite3'  # fallback for development
-        ),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=config(
+#             'DATABASE_URL',
+#             default=f'sqlite:///{BASE_DIR}/db.sqlite3'  # fallback for development
+#         ),
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
 # Example DATABASE_URL for reference:
 # postgresql://postgres:bhXOSSDPOjznEiYkjdicIDdtZwyZqbHx@postgres.railway.internal:5432/railway
 # PostgreSQL-specific options
