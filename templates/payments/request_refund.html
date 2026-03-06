@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Refund{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="mb-4">Request Refund</h3>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Refund Policy:</strong> Refunds are processed within 5-7 business days. Please provide a valid reason for your refund request.
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>Transaction Details</h5>
+                            <p class="mb-1"><strong>Course:</strong> {{ transaction.course.title }}</p>
+                            <p class="mb-1"><strong>Amount:</strong> ${{ transaction.amount }}</p>
+                            <p class="mb-1"><strong>Date:</strong> {{ transaction.created_at|date:"F d, Y" }}</p>
+                            <p class="mb-0"><strong>Transaction ID:</strong> <code>{{ transaction.transaction_id }}</code></p>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Refund *</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="4" required placeholder="Please tell us why you're requesting a refund..."></textarea>
+                            <small class="text-muted">Providing detailed feedback helps us improve our courses</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-paper-plane"></i> Submit Refund Request
+                            </button>
+                            <a href="{% url 'payments:transaction_history' %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

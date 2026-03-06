@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - E-Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>👑 Admin Dashboard</h1>
+            <p class="text-muted">Platform overview and management</p>
+        </div>
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3>{{ total_users }}</h3>
+                            <p class="mb-0">Total Users</p>
+                        </div>
+                        <i class="fas fa-users fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-primary bg-opacity-75">
+                    <small>{{ total_students }} Students • {{ total_instructors }} Instructors</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3>{{ total_courses }}</h3>
+                            <p class="mb-0">Total Courses</p>
+                        </div>
+                        <i class="fas fa-book fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-success bg-opacity-75">
+                    <small>{{ published_courses }} Published • {{ pending_courses }} Pending</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3>{{ total_enrollments }}</h3>
+                            <p class="mb-0">Enrollments</p>
+                        </div>
+                        <i class="fas fa-user-graduate fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-info bg-opacity-75">
+                    <small>Active student enrollments</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h3>${{ total_revenue|floatformat:2 }}</h3>
+                            <p class="mb-0">Total Revenue</p>
+                        </div>
+                        <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                    </div>
+                </div>
+                <div class="card-footer bg-warning bg-opacity-75">
+                    <small>Completed transactions</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Quick Actions</h5>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'users:admin_courses' %}?status=pending" class="btn btn-warning">
+                            <i class="fas fa-check-circle"></i> Approve Courses
+                        </a>
+                        <a href="{% url 'users:admin_users_list' %}" class="btn btn-primary">
+                            <i class="fas fa-users"></i> Manage Users
+                        </a>
+                        <a href="{% url 'users:admin_courses' %}" class="btn btn-success">
+                            <i class="fas fa-book"></i> Manage Courses
+                        </a>
+                        <a href="{% url 'users:admin_transactions' %}" class="btn btn-info">
+                            <i class="fas fa-money-bill"></i> View Transactions
+                        </a>
+                        <a href="/admin/courses/category/" class="btn btn-warning">
+                            <i class="fas fa-tags"></i> Manage Categories
+                        </a>
+                        <a href="/admin/" class="btn btn-secondary">
+                            <i class="fas fa-cog"></i> Django Admin
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Pending Courses -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Pending Courses ({{ pending_courses }})</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if pending_courses_list %}
+                        <div class="list-group list-group-flush">
+                            {% for course in pending_courses_list %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ course.title }}</h6>
+                                            <small class="text-muted">
+                                                By {{ course.instructor.get_full_name }} • {{ course.category.name }}
+                                            </small>
+                                        </div>
+                                        <a href="{% url 'users:admin_approve_course' course.id %}" class="btn btn-sm btn-primary">
+                                            Review
+                                        </a>
+                                    </div>
+                                </div>
+                                        {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">No pending courses</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+                            <!-- Pending Enrollment Requests -->
+                            <div class="card shadow mt-4">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0"><i class="fas fa-user-clock"></i> Pending Enrollment Requests ({{ pending_enrollment_count }})</h5>
+                                </div>
+                                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                    {% if pending_enrollment_requests %}
+                                        <div class="list-group list-group-flush">
+                                            {% for req in pending_enrollment_requests %}
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong>{{ req.user.get_full_name }}</strong>
+                                                        <div class="text-muted small">{{ req.course.title }}</div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <small class="text-muted d-block">{{ req.created_at|date:"M d" }}</small>
+                                                        <a href="{% url 'users:process_enrollment_request' req.id %}" class="btn btn-sm btn-outline-primary mt-2">Process</a>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-muted text-center py-3 mb-0">No pending enrollment requests</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+        </div>
+        
+        <!-- Recent Enrollments -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-plus"></i> Recent Enrollments</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if recent_enrollments %}
+                        <div class="list-group list-group-flush">
+                            {% for enrollment in recent_enrollments %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">{{ enrollment.user.get_full_name }}</h6>
+                                            <small class="text-muted">{{ enrollment.course.title }}</small>
+                                        </div>
+                                        <small class="text-muted">{{ enrollment.enrolled_at|date:"M d" }}</small>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 5px;">
+                                        <div class="progress-bar" style="width: {{ enrollment.progress_percentage }}%"></div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">No enrollments yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Transactions -->
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Course</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                        <tr>
+                                            <td>{{ transaction.created_at|date:"M d, Y" }}</td>
+                                            <td>{{ transaction.user.get_full_name }}</td>
+                                            <td>{{ transaction.course.title|truncatewords:5 }}</td>
+                                            <td><strong>${{ transaction.amount }}</strong></td>
+                                            <td>
+                                                <span class="badge bg-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'processing' %}info{% else %}danger{% endif %}">
+                                                    {{ transaction.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="/admin/payments/transaction/{{ transaction.id }}/change/" class="btn btn-sm btn-outline-primary">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">No transactions yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

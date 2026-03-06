@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Your Email{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope-open-text fa-4x text-primary mb-3"></i>
+                        <h2>Verify Your Email</h2>
+                        <p class="text-muted">We've sent a verification code to:</p>
+                        <p class="fw-bold">{{ user.email }}</p>
+                    </div>
+                    
+                    {% if verification.is_expired %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Code Expired!</strong> Your verification code has expired.
+                        </div>
+                    {% elif verification.attempts >= 5 %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-ban"></i>
+                            <strong>Too Many Attempts!</strong> Please request a new verification code.
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="verification_code" class="form-label">Enter 6-Digit Code</label>
+                            <input 
+                                type="text" 
+                                class="form-control form-control-lg text-center" 
+                                id="verification_code" 
+                                name="verification_code" 
+                                placeholder="000000"
+                                maxlength="6"
+                                pattern="[0-9]{6}"
+                                required
+                                style="letter-spacing: 10px; font-size: 24px; font-weight: bold;"
+                                {% if verification.is_expired or verification.attempts >= 5 %}disabled{% endif %}
+                            >
+                            <small class="text-muted">Please check your email inbox (and spam folder)</small>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            class="btn btn-primary w-100 btn-lg"
+                            {% if verification.is_expired or verification.attempts >= 5 %}disabled{% endif %}
+                        >
+                            <i class="fas fa-check-circle"></i> Verify Email
+                        </button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="text-muted mb-2">Didn't receive the code?</p>
+                        <a href="{% url 'users:resend_verification' user.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-redo"></i> Resend Code
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Note:</strong> The verification code is valid for 24 hours. After that, you'll need to request a new one.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'users:login' %}" class="text-muted">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-format code input
+    document.getElementById('verification_code').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    
+    // Auto-submit when 6 digits entered
+    document.getElementById('verification_code').addEventListener('input', function(e) {
+        if (this.value.length === 6) {
+            this.form.submit();
+        }
+    });
+</script>
+{% endblock %}

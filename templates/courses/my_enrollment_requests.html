@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}My Enrollment Requests{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">My Enrollment Requests</h2>
+    
+    {% if enrollment_requests %}
+        <div class="row g-4">
+            {% for req in enrollment_requests %}
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h5 class="card-title">{{ req.course.title }}</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-user"></i> Instructor: {{ req.course.instructor.get_full_name }}
+                                    </p>
+                                    <p class="mb-3"><strong>Your Reason:</strong><br>{{ req.reason|truncatewords:30 }}</p>
+                                    
+                                    {% if req.status == 'approved' and req.admin_notes %}
+                                        <div class="alert alert-success">
+                                            <strong>Admin Response:</strong> {{ req.admin_notes }}
+                                        </div>
+                                    {% elif req.status == 'rejected' and req.admin_notes %}
+                                        <div class="alert alert-danger">
+                                            <strong>Rejection Reason:</strong> {{ req.admin_notes }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-{% if req.status == 'pending' %}warning{% elif req.status == 'approved' %}success{% else %}danger{% endif %} mb-2">
+                                        {{ req.get_status_display }}
+                                    </span>
+                                    <p class="text-muted small mb-2">
+                                        Submitted: {{ req.created_at|date:"M d, Y" }}
+                                    </p>
+                                    {% if req.processed_at %}
+                                        <p class="text-muted small mb-2">
+                                            Processed: {{ req.processed_at|date:"M d, Y" }}
+                                        </p>
+                                    {% endif %}
+                                    
+                                    {% if req.status == 'approved' %}
+                                        <a href="{% url 'courses:course_detail' req.course.slug %}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-play"></i> Access Course
+                                        </a>
+                                    {% elif req.status == 'rejected' %}
+                                        <a href="{% url 'payments:checkout' req.course.slug %}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-shopping-cart"></i> Buy Course
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-info">Under Review</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+            <h4>No Enrollment Requests</h4>
+            <p class="text-muted">You haven't requested enrollment in any courses yet.</p>
+            <a href="{% url 'courses:course_list' %}" class="btn btn-primary">Browse Courses</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

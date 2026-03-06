@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Transactions - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="fas fa-money-bill-wave"></i> Transaction Management</h2>
+            <p class="text-muted">Monitor all platform transactions</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'users:admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link {% if not status_filter %}active{% endif %}" href="?">
+                        All Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'completed' %}active{% endif %}" href="?status=completed">
+                        <i class="fas fa-check-circle text-success"></i> Completed
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'processing' %}active{% endif %}" href="?status=processing">
+                        <i class="fas fa-spinner text-info"></i> Processing
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'failed' %}active{% endif %}" href="?status=failed">
+                        <i class="fas fa-times-circle text-danger"></i> Failed
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" href="?status=pending">
+                        <i class="fas fa-clock text-warning"></i> Pending
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Transactions Table -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Course</th>
+                            <th>Amount</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                            <tr>
+                                <td><code class="small">{{ transaction.transaction_id|truncatechars:12 }}</code></td>
+                                <td>{{ transaction.created_at|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <div>
+                                        <strong>{{ transaction.user.get_full_name }}</strong><br>
+                                        <small class="text-muted">{{ transaction.user.email }}</small>
+                                    </div>
+                                </td>
+                                <td>{{ transaction.course.title|truncatewords:5 }}</td>
+                                <td>
+                                    <strong class="text-success">${{ transaction.amount }}</strong>
+                                </td>
+                                <td>{{ transaction.phone_number }}</td>
+                                <td>
+                                    <span class="badge bg-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'processing' %}info{% elif transaction.status == 'failed' %}danger{% else %}warning{% endif %}">
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'payments:payment_status' transaction.transaction_id %}" class="btn btn-outline-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/admin/payments/transaction/{{ transaction.id }}/change/" class="btn btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="fas fa-receipt fa-3x text-muted mb-3 d-block"></i>
+                                    <p class="text-muted">No transactions found</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4">Complete Your Purchase</h2>
+            
+            {% if is_enrolled %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> You are already enrolled in this course.
+                    <a href="{% url 'courses:course_detail' course.slug %}">Go to course</a>
+                </div>
+            {% else %}
+                <div class="row">
+                    <!-- Order Summary -->
+                    <div class="col-md-7">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h4 class="mb-3">Order Summary</h4>
+                                <div class="d-flex mb-3">
+                                    {% if course.thumbnail %}
+                                        <img src="{{ course.thumbnail.url }}" style="width: 120px; height: 80px; object-fit: cover;" class="me-3" alt="{{ course.title }}">
+                                    {% endif %}
+                                    <div>
+                                        <h5>{{ course.title }}</h5>
+                                        <p class="text-muted small mb-0">{{ course.instructor.get_full_name }}</p>
+                                        <span class="badge bg-primary">{{ course.category.name }}</span>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Course Price:</span>
+                                    <strong>${{ course.price }}</strong>
+                                </div>
+                                {% if course.discount_price and course.discount_price < course.price %}
+                                    <div class="d-flex justify-content-between mb-2 text-success">
+                                        <span>Discount:</span>
+                                        <strong>-${{ course.price|floatformat:2|add:course.discount_price|floatformat:2 }}</strong>
+                                    </div>
+                                {% endif %}
+                                
+                                <hr>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <h5>Total:</h5>
+                                    <h5 class="text-primary">${{ course.get_effective_price }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Form -->
+                    <div class="col-md-5">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h4 class="mb-3">Payment Details</h4>
+                                
+                                <div class="text-center mb-3">
+                                    <div class="bg-primary text-white rounded p-3 mb-2">
+                                        <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                                        <h5 class="mb-0">Sifalo Pay</h5>
+                                    </div>
+                                    <p class="small text-muted">Secure payment via Sifalo Pay</p>
+                                </div>
+                                
+                                <form method="post" action="{% url 'payments:initiate_payment' course.slug %}">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-3">
+                                        <label for="phone_number" class="form-label">Mobile Number *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+252</span>
+                                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                                   placeholder="61 234 5678" required pattern="[0-9]{8,9}">
+                                        </div>
+                                        <small class="text-muted">Enter your Sifalo Pay mobile number</small>
+                                    </div>
+                                    
+                                    <div class="alert alert-info small">
+                                        <i class="fas fa-info-circle"></i>
+                                        You will receive a payment request on your phone. Enter your PIN to complete the payment.
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-lock"></i> Pay ${{ course.get_effective_price }}
+                                    </button>
+                                </form>
+                                
+                                <hr>
+                                
+                                <ul class="list-unstyled small text-muted mb-0">
+                                    <li><i class="fas fa-check text-success"></i> Secure payment</li>
+                                    <li><i class="fas fa-check text-success"></i> Instant access</li>
+                                    <li><i class="fas fa-check text-success"></i> 30-day money back guarantee</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

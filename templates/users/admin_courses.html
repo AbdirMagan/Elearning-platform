@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Courses - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>📚 Course Management</h2>
+            <p class="text-muted">Manage all courses on the platform</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'users:admin_dashboard' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+            <a href="/admin/courses/course/add/" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Course
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'users:admin_courses' %}">
+                        All Courses
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?status=published">
+                        Published
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?status=pending">
+                        Pending
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="?status=draft">
+                        Draft
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Quick Link to Django Admin -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        For full course management capabilities, visit the <a href="/admin/courses/course/" class="alert-link">Django Admin Panel</a>
+    </div>
+    
+    <!-- Simplified Course Overview -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Quick Links</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="/admin/courses/course/" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-book fa-2x d-block mb-2"></i>
+                                Manage All Courses
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/courses/category/" class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-tags fa-2x d-block mb-2"></i>
+                                Manage Categories
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/courses/lesson/" class="btn btn-outline-info w-100 py-3">
+                                <i class="fas fa-play-circle fa-2x d-block mb-2"></i>
+                                Manage Lessons
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/courses/enrollment/" class="btn btn-outline-warning w-100 py-3">
+                                <i class="fas fa-users fa-2x d-block mb-2"></i>
+                                View Enrollments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

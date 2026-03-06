@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - E-Learning Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Welcome back, {{ user.first_name }}! 👋</h1>
+            <p class="text-muted">Continue your learning journey</p>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h3>{{ enrollments.count }}</h3>
+                    <p class="mb-0"><i class="fas fa-book"></i> Enrolled Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h3>{{ enrollments|length }}</h3>
+                    <p class="mb-0"><i class="fas fa-check-circle"></i> Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <h3>{{ enrollments.count }}</h3>
+                    <p class="mb-0"><i class="fas fa-play-circle"></i> In Progress</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow">
+                <div class="card-body">
+                    <h3>0</h3>
+                    <p class="mb-0"><i class="fas fa-certificate"></i> Certificates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- My Courses -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-4">My Courses</h3>
+            
+            {% if enrollments %}
+                <div class="row">
+                    {% for enrollment in enrollments %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                {% if enrollment.course.thumbnail %}
+                                    <img src="{{ enrollment.course.thumbnail.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ enrollment.course.title }}">
+                                {% else %}
+                                    <div class="card-img-top bg-primary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                        <i class="fas fa-book-open fa-3x text-white"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <span class="badge bg-primary mb-2">{{ enrollment.course.category.name }}</span>
+                                    <h5 class="card-title">{{ enrollment.course.title }}</h5>
+                                    <p class="card-text text-muted">{{ enrollment.course.description|truncatewords:15 }}</p>
+                                    
+                                    <!-- Progress Bar -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <small>Progress</small>
+                                            <small>{{ enrollment.progress_percentage|floatformat:0 }}%</small>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ enrollment.progress_percentage }}%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <a href="{% url 'courses:course_detail' enrollment.course.slug %}" class="btn btn-primary w-100">
+                                        <i class="fas fa-play"></i> Continue Learning
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+                    <h4>No Courses Yet</h4>
+                    <p class="text-muted">Start your learning journey by enrolling in a course</p>
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-primary">Browse Courses</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- My Enrollment Requests -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">My Enrollment Requests</h3>
+
+            {% if enrollment_requests %}
+                <div class="list-group">
+                    {% for req in enrollment_requests %}
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="mb-1">{{ req.course.title }}</h5>
+                                <small class="text-muted">Submitted: {{ req.created_at|date:"M d, Y" }}</small>
+                                <p class="mb-0 mt-2 text-muted">{{ req.reason|truncatewords:20 }}</p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-{% if req.status == 'pending' %}warning{% elif req.status == 'approved' %}success{% else %}danger{% endif %} mb-2">{{ req.get_status_display }}</span>
+                                <div>
+                                    <a href="{% url 'courses:my_enrollment_requests' %}" class="btn btn-sm btn-outline-primary mt-2">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">You have no enrollment requests.</p>
+                    <a href="{% url 'courses:course_list' %}" class="btn btn-primary">Browse Courses</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2>Manage Users</h2>
+            <p class="text-muted">View and manage all platform users</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'users:admin_dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link {% if not selected_type %}active{% endif %}" href="{% url 'users:admin_users_list' %}">
+                        All Users ({{ users.count }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'student' %}active{% endif %}" href="?type=student">
+                        Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'instructor' %}active{% endif %}" href="?type=instructor">
+                        Instructors
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if selected_type == 'admin' %}active{% endif %}" href="?type=admin">
+                        Administrators
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Users Table -->
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if user.profile_picture %}
+                                            <img src="{{ user.profile_picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ user.get_full_name }}</strong><br>
+                                            <small class="text-muted">@{{ user.username }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge bg-{% if user.user_type == 'admin' %}danger{% elif user.user_type == 'instructor' %}warning{% else %}info{% endif %}">
+                                        {{ user.get_user_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if user.is_active %}success{% else %}secondary{% endif %}">
+                                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
+                                    {% if user.is_verified %}
+                                        <i class="fas fa-check-circle text-success" title="Verified"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/users/customuser/{{ user.id }}/change/" class="btn btn-outline-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if user.user_type == 'instructor' %}
+                                            <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-info" title="View Courses">
+                                                <i class="fas fa-book"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">No users found</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

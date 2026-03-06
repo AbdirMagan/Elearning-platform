@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Course - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'users:admin_dashboard' %}">Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active">Review Course</li>
+                </ol>
+            </nav>
+            <h2>Review Course</h2>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h3 class="mb-3">{{ course.title }}</h3>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-primary">{{ course.category.name }}</span>
+                        <span class="badge bg-secondary">{{ course.get_level_display }}</span>
+                        <span class="badge bg-{% if course.status == 'published' %}success{% elif course.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                            {{ course.get_status_display }}
+                        </span>
+                    </div>
+                    
+                    <p><strong>Instructor:</strong> {{ course.instructor.get_full_name }} ({{ course.instructor.email }})</p>
+                    
+                    <hr>
+                    
+                    <h5>Description</h5>
+                    <p>{{ course.description }}</p>
+                    
+                    <hr>
+                    
+                    {% if course.what_you_will_learn %}
+                    <h5>What Students Will Learn</h5>
+                    <ul>
+                        {% for item in course.what_you_will_learn.splitlines %}
+                            {% if item.strip %}
+                                <li>{{ item }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <hr>
+                    {% endif %}
+                    
+                    {% if course.requirements %}
+                    <h5>Requirements</h5>
+                    <ul>
+                        {% for req in course.requirements.splitlines %}
+                            {% if req.strip %}
+                                <li>{{ req }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <hr>
+                    {% endif %}
+                    
+                    <h5>Course Content</h5>
+                    <p><strong>Lessons:</strong> {{ course.lessons.count }}</p>
+                    <p><strong>Duration:</strong> {{ course.duration_hours }} hours</p>
+                    
+                    {% if course.lessons.all %}
+                        <div class="list-group">
+                            {% for lesson in course.lessons.all %}
+                                <div class="list-group-item">
+                                    <strong>{{ forloop.counter }}. {{ lesson.title }}</strong>
+                                    {% if lesson.is_preview %}
+                                        <span class="badge bg-success">Preview</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}">
+                {% else %}
+                    <div class="bg-primary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-book-open fa-4x"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5>Course Details</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <strong>Price:</strong> 
+                            {% if course.is_free %}
+                                <span class="text-success">FREE</span>
+                            {% else %}
+                                ${{ course.price }}
+                            {% endif %}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Language:</strong> {{ course.language }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Level:</strong> {{ course.get_level_display }}
+                        </li>
+                        <li class="mb-2">
+                            <strong>Created:</strong> {{ course.created_at|date:"M d, Y" }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="mb-3">Review Actions</h5>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="action" value="approve" class="btn btn-success btn-lg">
+                                <i class="fas fa-check"></i> Approve & Publish
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-lg">
+                                <i class="fas fa-times"></i> Reject
+                            </button>
+                            <a href="{% url 'users:admin_dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-3">
+                    
+                    <p class="small text-muted mb-0">
+                        <i class="fas fa-info-circle"></i> 
+                        Approving will publish the course and make it visible to students. Rejecting will move it back to draft status.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

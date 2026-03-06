@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Learn online with our comprehensive e-learning platform{% endblock %}">
+    <title>{% block title %}Magan Academy{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Load Google Fonts and global stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    <style>
+        /* Announcement banner sticky and navbar offset */
+        .announcement-banner {
+            position: sticky;
+            top: 0;
+            z-index: 1060;
+        }
+
+        /* Navbar should sit below the announcement when present */
+        nav.sticky-top {
+            top: var(--announcement-height, 0px);
+            z-index: 1050;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'courses:home' %}">
+                <i class="fas fa-graduation-cap text-primary"></i> Magan Academy
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'courses:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'courses:course_list' %}">Courses</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:dashboard' %}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ user.get_full_name|default:user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'payments:transaction_history' %}">Transactions</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="/admin/">Admin Panel</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm ms-2" href="{% url 'users:register' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white"><i class="fas fa-graduation-cap"></i>Magan Academy</h5>
+                    <p class="text-white">Your gateway to quality online education. Learn at your own pace with expert instructors.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6 class="text-white">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'courses:home' %}" class="text-white text-decoration-none">Home</a></li>
+                        <li><a href="{% url 'courses:course_list' %}" class="text-white text-decoration-none">Courses</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'users:dashboard' %}" class="text-white text-decoration-none">Dashboard</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h6 class="text-white">Contact</h6>
+                    <ul class="list-unstyled text-white">
+                        <li><i class="fas fa-envelope"></i> <a href="mailto:AbadirHassan10@gmail.com" class="text-white text-decoration-none">AbadirHassan10@gmail.com</a></li>
+                        <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/252634024452" target="_blank" rel="noopener" class="text-white text-decoration-none">+252 634024452</a></li>
+                        <li>
+                            <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                            <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                            <a href="#" class="text-white"><i class="fab fa-linkedin fa-lg"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="bg-secondary">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="text-white mb-0">&copy; 2026 Magan Academy . All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+     
+    <!-- <script data-cfasync="false" src="/cd -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function(){
+            function updateAnnouncementHeight(){
+                var el = document.getElementById('announcementBanner');
+                var h = '0px';
+                if(el && el.offsetHeight){
+                    h = el.offsetHeight + 'px';
+                }
+                document.documentElement.style.setProperty('--announcement-height', h);
+            }
+
+            function updateCountdowns(){
+                var nodes = document.querySelectorAll('.announcement-countdown');
+                nodes.forEach(function(span){
+                    var end = span.dataset.end;
+                    if(!end) return;
+                    var t = new Date(end);
+                    var now = new Date();
+                    var diff = t - now;
+                    if(diff <= 0){
+                        span.textContent = '0d 0h';
+                        return;
+                    }
+                    var days = Math.floor(diff / 86400000);
+                    var hours = Math.floor((diff % 86400000) / 3600000);
+                    span.textContent = days + 'd ' + hours + 'h';
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                updateAnnouncementHeight();
+                updateCountdowns();
+
+                var ab = document.getElementById('announcementBanner');
+                if(ab){
+                    ab.addEventListener('closed.bs.alert', function(){
+                        updateAnnouncementHeight();
+                    });
+                }
+
+                if(ab && window.MutationObserver){
+                    var obs = new MutationObserver(function(){
+                        updateAnnouncementHeight();
+                        updateCountdowns();
+                    });
+                    obs.observe(ab, {attributes:true, childList:true, subtree:true});
+                }
+
+                setInterval(updateCountdowns, 60000);
+                window.addEventListener('resize', updateAnnouncementHeight);
+            });
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+    </body>
+    </html>

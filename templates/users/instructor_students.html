@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Students - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'users:instructor_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Students</li>
+                </ol>
+            </nav>
+            <h2>{{ course.title }}</h2>
+            <p class="text-muted">Students enrolled in this course</p>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h3>{{ enrollments.count }}</h3>
+                    <p class="mb-0">Total Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h3>{{ enrollments|length }}</h3>
+                    <p class="mb-0">Active</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h3>0</h3>
+                    <p class="mb-0">Completed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <h4 class="mb-4">Enrolled Students</h4>
+            
+            {% if enrollments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Enrolled Date</th>
+                                <th>Progress</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for enrollment in enrollments %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if enrollment.user.profile_picture %}
+                                                <img src="{{ enrollment.user.profile_picture.url }}" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                    {{ enrollment.user.first_name|first }}{{ enrollment.user.last_name|first }}
+                                                </div>
+                                            {% endif %}
+                                            <strong>{{ enrollment.user.get_full_name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ enrollment.user.email }}</td>
+                                    <td>{{ enrollment.enrolled_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                <div class="progress-bar" style="width: {{ enrollment.progress_percentage }}%">
+                                                    {{ enrollment.progress_percentage|floatformat:0 }}%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if enrollment.is_active %}success{% else %}secondary{% endif %}">
+                                            {% if enrollment.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5>No Students Enrolled Yet</h5>
+                    <p class="text-muted">Students will appear here once they enroll in your course</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

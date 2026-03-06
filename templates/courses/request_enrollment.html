@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Enrollment - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'courses:home' %}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'courses:course_detail' course.slug %}">{{ course.title }}</a></li>
+                    <li class="breadcrumb-item active">Request Enrollment</li>
+                </ol>
+            </nav>
+            
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-hand-holding-usd fa-4x text-primary mb-3"></i>
+                        <h2>Request Free Enrollment</h2>
+                        <p class="text-muted">Can't afford this course? Request free enrollment!</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>How it works:</strong>
+                        <ol class="mb-0 mt-2">
+                            <li>Submit your request with a valid reason</li>
+                            <li>An administrator will review your request</li>
+                            <li>You'll receive an email with the decision</li>
+                            <li>If approved, you'll get instant access to the course</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h5>Course Details</h5>
+                            <p class="mb-1"><strong>Title:</strong> {{ course.title }}</p>
+                            <p class="mb-1"><strong>Instructor:</strong> {{ course.instructor.get_full_name }}</p>
+                            <p class="mb-0"><strong>Price:</strong> ${{ course.price }}</p>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="reason" class="form-label">Why do you want to enroll in this course? *</label>
+                            <textarea 
+                                class="form-control" 
+                                id="reason" 
+                                name="reason" 
+                                rows="6" 
+                                required
+                                placeholder="Please explain why you're requesting free enrollment. Include details about your background, goals, and why this course is important to you."
+                            ></textarea>
+                            <small class="text-muted">Be specific and honest. Good reasons increase approval chances.</small>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Note:</strong> Submitting false information may result in account suspension. Only request if you genuinely need financial assistance.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                            <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Course
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

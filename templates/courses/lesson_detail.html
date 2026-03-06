@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} - {{ course.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Disable text selection */
+    body {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Disable right click */
+    body {
+        pointer-events: auto;
+    }
+    
+    /* Watermark */
+    .video-watermark {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar with lessons -->
+        <div class="col-md-3 bg-light border-end" style="height: 100vh; overflow-y: auto;">
+            <div class="p-3">
+                <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-outline-primary btn-sm mb-3 w-100">
+                    <i class="fas fa-arrow-left"></i> Back to Course
+                </a>
+                
+                <h5>{{ course.title }}</h5>
+                <div class="progress mb-3">
+                    <div class="progress-bar" role="progressbar" style="width: {% if enrollment %}{{ enrollment.progress_percentage }}{% else %}0{% endif %}%"></div>
+                </div>
+                <small class="text-muted">{% if enrollment %}{{ enrollment.progress_percentage|floatformat:0 }}{% else %}0{% endif %}% Complete</small>
+                
+                <hr>
+                
+                <h6 class="mb-3">Lessons</h6>
+                <div class="list-group">
+                    {% for l in lessons %}
+                        <a href="{% url 'courses:lesson_detail' course.slug l.slug %}" 
+                           class="list-group-item list-group-item-action {% if l.id == lesson.id %}active{% endif %}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-play-circle"></i>
+                                    {{ forloop.counter }}. {{ l.title }}
+                                </div>
+                                {% if enrollment %}
+                                    {% if l.id in completed_lesson_ids %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="col-md-9">
+            <div class="p-4">
+                <!-- Lesson Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2>{{ lesson.title }}</h2>
+                        <p class="text-muted">{{ lesson.description }}</p>
+                    </div>
+                    {% if enrollment %}
+                        <form method="post" action="{% url 'courses:mark_lesson_complete' course.slug lesson.slug %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Mark Complete
+                            </button>
+                        </form>
+                    {% else %}
+                        {% if user.is_authenticated and user.user_type == 'student' and not course.is_free %}
+                            {% if enrollment_request %}
+                                {% if enrollment_request.status == 'pending' %}
+                                    <a href="{% url 'courses:my_enrollment_requests' %}" class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-hourglass-half"></i> Requested (Pending)
+                                    </a>
+                                {% elif enrollment_request.status == 'approved' %}
+                                    <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Accepted
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'courses:my_enrollment_requests' %}" class="btn btn-outline-danger">
+                                        <i class="fas fa-times-circle"></i> Request Rejected
+                                    </a>
+                                {% endif %}
+                            {% else %}
+                                <a href="{% url 'courses:request_enrollment' course.slug %}" class="btn btn-outline-success">
+                                    <i class="fas fa-hand-holding-usd"></i> Request Free Enrollment
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                <!-- Video Player with Protection -->
+                {% if lesson.video_file %}
+                    <div class="position-relative mb-4" id="video-container">
+                        <div class="video-watermark">
+                            {{ user.email }} - Do Not Share
+                        </div>
+                        <div class="ratio ratio-16x9">
+                            <video 
+                                id="lesson-video"
+                                controls
+                                controlsList="nodownload"
+                                disablePictureInPicture
+                                oncontextmenu="return false;"
+                                class="w-100"
+                            >
+                                <source src="{{ lesson.video_file.url }}" type="video/mp4">
+                                <source src="{{ lesson.video_file.url }}" type="video/webm">
+                                <source src="{{ lesson.video_file.url }}" type="video/ogg">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                {% elif lesson.youtube_id %}
+                    <div class="position-relative mb-4" id="video-container">
+                        <div class="video-watermark">
+                            {{ user.email }} - Do Not Share
+                        </div>
+                        <div class="ratio ratio-16x9">
+                            <iframe 
+                                id="youtube-player"
+                                src="https://www.youtube.com/embed/{{ lesson.youtube_id }}?rel=0&modestbranding=1&showinfo=0&controls=1&disablekb=1"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                            ></iframe>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Video content coming soon
+                    </div>
+                {% endif %}
+                
+                <!-- Lesson Content -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4>About This Lesson</h4>
+                        <p>{{ lesson.description|default:"No description available for this lesson." }}</p>
+                    </div>
+                </div>
+                
+                <!-- Downloadable Materials -->
+                {% if materials %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-3">Downloadable Materials</h4>
+                            <div class="list-group">
+                                {% for material in materials %}
+                                    <a href="{{ material.file.url }}" download class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fas fa-file-{{ material.file_type }} me-2"></i>
+                                            {{ material.title }}
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-primary">{{ material.file_size|filesizeformat }}</span>
+                                            <i class="fas fa-download ms-2"></i>
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between">
+                    {% if prev_lesson %}
+                        <a href="{% url 'courses:lesson_detail' course.slug prev_lesson.slug %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Previous Lesson
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+
+                    {% if next_lesson %}
+                        <a href="{% url 'courses:lesson_detail' course.slug next_lesson.slug %}" class="btn btn-primary">
+                            Next Lesson <i class="fas fa-arrow-right"></i>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'courses:course_detail' course.slug %}" class="btn btn-success">
+                            <i class="fas fa-check"></i> Complete Course
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Disable right-click
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    
+    // Disable F12 and developer tools
+    document.addEventListener('keydown', function(e) {
+        // Disable F12
+        if (e.keyCode == 123) {
+            e.preventDefault();
+            return false;
+        }
+        // Disable Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 73) {
+            e.preventDefault();
+            return false;
+        }
+        // Disable Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 74) {
+            e.preventDefault();
+            return false;
+        }
+        // Disable Ctrl+U
+        if (e.ctrlKey && e.keyCode == 85) {
+            e.preventDefault();
+            return false;
+        }
+        // Disable Ctrl+S
+        if (e.ctrlKey && e.keyCode == 83) {
+            e.preventDefault();
+            return false;
+        }
+        // Disable PrintScreen
+        if (e.keyCode == 44) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Detect screen recording (basic detection)
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        console.warn('Screen recording capability detected');
+    }
+    
+    // Disable copy
+    document.addEventListener('copy', event => {
+        event.preventDefault();
+        alert('Copying is disabled for copyright protection');
+    });
+    
+    // Detect if developer tools are open
+    var devtools = {open: false, orientation: null};
+    var threshold = 160;
+    
+    setInterval(function() {
+        if (window.outerWidth - window.innerWidth > threshold || 
+            window.outerHeight - window.innerHeight > threshold) {
+            if (!devtools.open) {
+                console.warn('Developer tools detected');
+                // Optionally: redirect or show warning
+                // window.location.href = '/';
+            }
+            devtools.open = true;
+        } else {
+            devtools.open = false;
+        }
+    }, 500);
+    
+    // Blur detection (user switched to another tab/window)
+    var lastActivity = Date.now();
+    var suspiciousActivityCount = 0;
+    
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            // Pause offline video
+            var videoPlayer = document.getElementById('lesson-video');
+            if (videoPlayer) {
+                videoPlayer.pause();
+            }
+            
+            // Pause YouTube video
+            var youtubePlayer = document.getElementById('youtube-player');
+            if (youtubePlayer) {
+                youtubePlayer.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            }
+        }
+    });
+    
+    // Disable video download attempts
+    var video = document.getElementById('lesson-video');
+    if (video) {
+        // Disable right-click on video
+        video.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            alert('Video downloading is not allowed');
+            return false;
+        });
+        
+        // Disable video controls that allow download
+        video.controlsList = "nodownload";
+        video.disablePictureInPicture = true;
+        
+        // Monitor playback for suspicious activity
+        video.addEventListener('seeking', function() {
+            console.log('Video seeking detected');
+        });
+    }
+    
+    // Detect suspicious activity
+    window.addEventListener('blur', function() {
+        suspiciousActivityCount++;
+        if (suspiciousActivityCount > 5) {
+            console.warn('Suspicious activity detected - frequent tab switching');
+        }
+    });
+</script>
+{% endblock %}
