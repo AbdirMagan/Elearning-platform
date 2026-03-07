@@ -25,7 +25,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-produc
 # ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,MaganH.pythonanywhere.com', cast=Csv())
 DEBUG=False
 ALLOWED_HOSTS=["*"]
-CSRF_TRUSTED_ORIGINS=["https://elearning-platform-production-d767.up.railway.app","http://127.0.0.1:8000"]
+# CSRF_TRUSTED_ORIGINS=["https://elearning-platform-production-d767.up.railway.app","http://127.0.0.1:8000"]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -195,7 +195,7 @@ SERVER_EMAIL = config('SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
 SITE_URL = config('SITE_URL', default='https://MaganH.pythonanywhere.com')
 
 # Trusted origins for CSRF when running in production. Can be overridden via env var.
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://MaganH.pythonanywhere.com', cast=Csv())
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://elearning-platform-production-3163.up.railway.app/', cast=Csv())
 
 # Security Settings for Production
 if not DEBUG:
