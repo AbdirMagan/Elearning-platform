@@ -5,6 +5,7 @@ Django settings for elearning project.
 import os
 
 from decouple import config
+import dj_database_url
 
 from pathlib import Path
 from pathlib import Path
@@ -76,25 +77,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'elearning.wsgi.application'
-# DB_LIVE=os.environ.get("DB_LIVE")
-# if DB_LIVE in ["False",False]:
-#     DATABASES = {
-#         'default':{
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': BASE_DIR / 'db.sqlite3',
-#         }
-#     }
-# else:
 DATABASES = {
-    'default':{
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get("DB_NAME"),
-        'USER': os.environ.get("DB_USER"),
-        'PASSWORD': os.environ.get("DB_PASSWORD"),
-        'HOST': os.environ.get("DB_HOST"),
-        'PORT': os.environ.get("DB_PORT"),
-        
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default=f'sqlite:///{BASE_DIR}/db.sqlite3'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
     
     
@@ -163,6 +151,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# For local dev only; comment out for production with WhiteNoise
 # STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # WhiteNoise static file serving

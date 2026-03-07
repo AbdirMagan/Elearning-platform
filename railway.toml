@@ -1,0 +1,18 @@
+# Railway deployment configuration for Django
+
+[build]
+# Install dependencies and collect static files
+env = "production"
+
+[deploy]
+# Run collectstatic after install
+env = "production"
+start = "python manage.py collectstatic --noinput && gunicorn elearning.wsgi:application"
+
+[services]
+# Example: PostgreSQL service (uncomment and configure if using Railway's managed Postgres)
+# [[services]]
+# name = "postgres"
+# type = "postgres"
+# env = "production"
+# # Railway will inject DATABASE_URL automatically
