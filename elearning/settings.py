@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     # Third party apps
     'crispy_forms',
     'crispy_bootstrap5',
+    'cloudinary_storage',
+    'cloudinary',
     
     # Local apps
     'users.apps.UsersConfig',
@@ -161,8 +163,18 @@ if not os.path.exists(os.path.join(BASE_DIR, 'static')):
 # WhiteNoise static file serving
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
+# Cloudinary settings for media storage
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
