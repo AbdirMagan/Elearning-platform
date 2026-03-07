@@ -150,11 +150,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # For local dev only; comment out for production with WhiteNoise
 # STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
-MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'media'))
+# put uploaded media inside the static folder so Railway volume can store both under one path
+MEDIA_ROOT = config('MEDIA_ROOT', default=os.path.join(BASE_DIR, 'static', 'media'))
 
-# Ensure media directory exists
+# Ensure media directory exists (create both static and media folders if needed)
 if not os.path.exists(MEDIA_ROOT):
     os.makedirs(MEDIA_ROOT)
+if not os.path.exists(os.path.join(BASE_DIR, 'static')):
+    os.makedirs(os.path.join(BASE_DIR, 'static'))
 # WhiteNoise static file serving
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
