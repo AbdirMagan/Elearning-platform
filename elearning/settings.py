@@ -192,14 +192,14 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='AbadirHassan10@gmail.com')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='4711705@Ab.')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='AbadirHassan10@gmail.com')
 SERVER_EMAIL = config('SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
-SITE_URL = config('SITE_URL', default='https://MaganH.pythonanywhere.com')
+SITE_URL = config('SITE_URL', default='https://elearning-platform-production-3163.up.railway.app')
 
 # Trusted origins for CSRF when running in production. Can be overridden via env var.
 CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://elearning-platform-production-3163.up.railway.app/', cast=Csv())
 
 # Security Settings for Production
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
