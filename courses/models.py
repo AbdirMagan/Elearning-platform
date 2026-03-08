@@ -483,8 +483,11 @@ class HeroSlide(models.Model):
     subtitle = models.TextField(help_text='Subtitle or description')
     
     # Background image
+    from cloudinary_storage.storage import MediaCloudinaryStorage
+
     background_image = models.ImageField(
         upload_to='hero_slides/',
+        storage=MediaCloudinaryStorage(),
         help_text='Recommended size: 1920x800px'
     )
     
